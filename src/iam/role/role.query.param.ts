@@ -1,14 +1,25 @@
 import { IsOptional, IsString } from 'class-validator';
 import { PaginationSortOrderParams } from '../../helpers';
 import { RoleSortOrder, RoleSortOrderKey } from './schemas/role.schema';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class RoleQueryParam extends PaginationSortOrderParams {
   @IsString()
   @IsOptional()
+  @ApiProperty({
+    description: 'The uuid of role',
+    example: 'uuid',
+    required: false,
+  })
   uuid?: string;
 
   @IsString()
   @IsOptional()
+  @ApiProperty({
+    description: 'The name of role',
+    example: 'name',
+    required: false,
+  })
   name?: string;
 
   getRoleSortOrder(): RoleSortOrder | undefined {
@@ -21,15 +32,5 @@ export class RoleQueryParam extends PaginationSortOrderParams {
       }
     }
     return roleSortOrder;
-  }
-
-  getFilter(): Record<string, any> {
-    const filter: Record<string, any> = {};
-    for (const key of Object.keys(this)) {
-      if (this[key] !== undefined) {
-        filter[key] = this[key];
-      }
-    }
-    return filter;
   }
 }

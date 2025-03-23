@@ -1,6 +1,6 @@
 export enum AccountType {
-  SUPER_ADMIN = 1,
-  ADMIN = 2,
-  ORG_USER = 3,
-  USER = 4,
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  GUEST = 'GUEST',
 }

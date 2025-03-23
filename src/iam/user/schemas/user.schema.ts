@@ -117,6 +117,7 @@ UserSchema.virtual('roles', {
   foreignField: 'uuid',
   justOne: false,
 });
+
 UserSchema.virtual('org', {
   ref: 'Org',
   localField: 'orgUuid',

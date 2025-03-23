@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -12,13 +13,24 @@ import { RoleService, RoleServiceOptions } from './role.service';
 import { CreateRoleDto } from './dtos /create-role.dto';
 import { UpdateRoleDto } from './dtos /update-role.dto';
 import { Role } from './schemas/role.schema';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppResponse } from '../../helpers';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  AppResponse,
+  PaginatedResponse,
+  PaginatedResponseDecorator,
+} from '../../helpers';
 import { RoleQueryParam } from './role.query.param';
 
 @Controller('role')
 @ApiTags('Role')
 export class RoleController {
+  private readonly logger = new Logger(RoleController.name);
+
   constructor(private roleService: RoleService) {}
 
   @Post()
@@ -28,28 +40,38 @@ export class RoleController {
     description: 'Successfully created org',
     type: Role,
   })
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.create(createRoleDto);
+  async create(@Body() createRoleDto: CreateRoleDto) {
+    try {
+      return await this.roleService.create(createRoleDto);
+    } catch (error) {
+      this.logger.error('Error creating role', error.stack);
+      throw error;
+    }
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all roles' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Successfully retrieved roles',
-    type: Role,
-    isArray: true,
-  })
-  findAll(@Param() roleQueryParam: RoleQueryParam) {
+  @ApiOkResponse(PaginatedResponseDecorator(Role))
+  async findAll(
+    @Param() roleQueryParam: RoleQueryParam,
+  ): Promise<PaginatedResponse<Role>> {
     try {
       const filter = roleQueryParam.getFilter();
       const options: RoleServiceOptions = {
         pagination: roleQueryParam.getPagination(),
         sort: roleQueryParam.getRoleSortOrder(),
       };
-      return this.roleService.findAll(filter, options);
-    } catch (e) {
-      throw e;
+      const total = await this.roleService.count(filter);
+      const roles = await this.roleService.findAll(filter, options);
+      return PaginatedResponse.success<Role>(
+        roles,
+        total,
+        roleQueryParam.getPage(),
+        roleQueryParam.getPageSize(),
+      );
+    } catch (error) {
+      this.logger.error('Error fetching role', error.stack);
+      throw error;
     }
   }
 
@@ -60,11 +82,12 @@ export class RoleController {
     description: 'Successfully retrieved role',
     type: Role,
   })
-  findOne(@Param('uuid') uuid: string) {
+  async findOne(@Param('uuid') uuid: string): Promise<Role> {
     try {
       return this.roleService.findOne({ uuid }, { isPopulate: true });
-    } catch (e) {
-      throw e;
+    } catch (error) {
+      this.logger.error(`Error fetching role with uuid: ${uuid}`, error.stack);
+      throw error;
     }
   }
 
@@ -75,13 +98,17 @@ export class RoleController {
     description: 'Successfully update role',
     type: Role,
   })
-  update(@Param('uuid') uuid: string, @Body() updateRoleDto: UpdateRoleDto) {
+  async update(
+    @Param('uuid') uuid: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ): Promise<Role> {
     try {
-      return this.roleService.update({ uuid }, updateRoleDto, {
+      return await this.roleService.update({ uuid }, updateRoleDto, {
         isPopulate: true,
       });
-    } catch (e) {
-      throw e;
+    } catch (error) {
+      this.logger.error(`Error updating role with uuid: ${uuid}`, error.stack);
+      throw error;
     }
   }
 
@@ -92,7 +119,12 @@ export class RoleController {
     description: 'Successfully removed role',
     type: AppResponse,
   })
-  remove(@Param('uuid') uuid: string) {
-    return this.roleService.remove({ uuid });
+  async remove(@Param('uuid') uuid: string): Promise<AppResponse> {
+    try {
+      return await this.roleService.remove({ uuid });
+    } catch (error) {
+      this.logger.error(`Error deleting role with uuid: ${uuid}`, error.stack);
+      throw error;
+    }
   }
 }

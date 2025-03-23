@@ -66,8 +66,4 @@ export class AuthService {
       throw e;
     }
   }
-
-  async getUser(uuid: string) {
-    return await this.userService.findOne({ uuid });
-  }
 }

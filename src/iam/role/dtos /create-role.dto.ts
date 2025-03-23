@@ -9,7 +9,7 @@ export class Permission implements IPermission {
   @IsEnum(Resource)
   @ApiProperty({
     description: 'The resource of role',
-    enum: ['settings', 'orgs', 'roles', 'users'],
+    enum: Resource,
     example: 'settings',
   })
   resource: Resource;
@@ -18,7 +18,7 @@ export class Permission implements IPermission {
   @ArrayUnique()
   @ApiProperty({
     description: 'The actions of role',
-    enum: ['read', 'create', 'update', 'delete'],
+    enum: Action,
     isArray: true,
     example: ['read', 'create'],
   })

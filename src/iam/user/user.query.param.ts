@@ -34,14 +34,4 @@ export class UserQueryParam extends PaginationSortOrderParams {
     }
     return userSortOrder;
   }
-
-  getFilter(): Record<string, any> {
-    const filter: Record<string, any> = {};
-    for (const key of Object.keys(this)) {
-      if (this[key] !== undefined) {
-        filter[key] = this[key];
-      }
-    }
-    return filter;
-  }
 }

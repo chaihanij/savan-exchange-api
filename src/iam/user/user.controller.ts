@@ -12,13 +12,22 @@ import { UserService, UserServiceOptions } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { HashingService } from '../hashing/hashing.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from './schemas/user.schema';
 import { UserQueryParam } from './user.query.param';
-import { AppResponse } from '../../helpers';
+import {
+  AppResponse,
+  PaginatedResponse,
+  PaginatedResponseDecorator,
+} from '../../helpers';
 
 @Controller('user')
-@ApiTags('Role')
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -47,12 +56,7 @@ export class UserController {
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Successfully retrieved users',
-    type: User,
-    isArray: true,
-  })
+  @ApiOkResponse(PaginatedResponseDecorator(User))
   async findAll(@Param() userQueryParam: UserQueryParam) {
     try {
       const filter = userQueryParam.getFilter();
@@ -60,13 +64,26 @@ export class UserController {
         pagination: userQueryParam.getPagination(),
         sort: userQueryParam.getUserSortOrder(),
       };
-      return await this.userService.findAll(filter, options);
+      const total = await this.userService.count(filter);
+      const users = await this.userService.findAll(filter, options);
+      return PaginatedResponse.success<User>(
+        users,
+        total,
+        userQueryParam.getPage(),
+        userQueryParam.getPageSize(),
+      );
     } catch (e) {
       throw e;
     }
   }
 
   @Get(':uuid')
+  @ApiOperation({ summary: 'Get a user by uuid' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successfully retrieved user',
+    type: User,
+  })
   async findOne(@Param('uuid') uuid: string) {
     try {
       return await this.userService.findOne({ uuid }, { isPopulate: true });

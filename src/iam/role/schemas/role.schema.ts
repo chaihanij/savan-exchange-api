@@ -5,10 +5,10 @@ import { Resource } from '../enums/resource.enum';
 import { randomUUID } from 'crypto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Org } from '../../org/schemas/org.schema';
+import { User } from '../../user/schemas/user.schema';
 
 export type RoleDocument = HydratedDocument<Role>;
 
-@Schema()
 class Permission {
   @Prop({ required: true, enum: Resource })
   @ApiProperty({
@@ -105,16 +105,20 @@ RoleSchema.virtual('org', {
   foreignField: 'uuid',
   justOne: true,
 });
-
-export type RoleProjection = {
-  _id: number;
-  uuid: number;
-  name: number;
-  permissions: number;
-  orgUuid: number;
-  createdAt: number;
-  updatedAt: number;
-};
+RoleSchema.virtual('createdBy', {
+  ref: User.name,
+  localField: 'createdByUuid',
+  foreignField: 'uuid',
+  justOne: true,
+  options: { select: { username: 1, firstName: 1, lastName: 1 } },
+});
+RoleSchema.virtual('updatedBy', {
+  ref: User.name,
+  localField: 'updatedByUuid',
+  foreignField: 'uuid',
+  justOne: true,
+  options: { select: { username: 1, firstName: 1, lastName: 1 } },
+});
 
 export const RoleSortOrderKey = ['name', 'orgUuid', 'createdAt', 'updatedAt'];
 export type RoleSortOrder = Record<string, SortOrder>;

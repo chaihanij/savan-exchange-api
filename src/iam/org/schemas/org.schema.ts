@@ -78,14 +78,5 @@ OrgSchema.virtual('updatedBy', {
   options: { select: { username: 1, firstName: 1, lastName: 1 } },
 });
 
-export type OrgProjection = {
-  _id: number;
-  uuid: number;
-  name: number;
-  address: number;
-  createdAt: number;
-  updatedAt: number;
-};
-
 export const OrgSortOrderKey = ['name', 'createdAt', 'updatedAt'];
 export type OrgSortOrder = Record<string, SortOrder>;
