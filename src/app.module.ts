@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from './config';
 import { IamModule } from './iam/iam.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TerminusModule } from '@nestjs/terminus';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TerminusModule } from '@nestjs/terminus';
       inject: [ConfigService],
     }),
     IamModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

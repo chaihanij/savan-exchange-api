@@ -16,7 +16,9 @@ export class ConfigService {
   get mongodbUrl(): string {
     const mongodbUrl = this.config.get<string>('MONGODB_URL');
     if (!mongodbUrl) {
-      throw new Error('MONGODB_URL is not defined in the environment variables');
+      throw new Error(
+        'MONGODB_URL is not defined in the environment variables',
+      );
     }
     return mongodbUrl;
   }
@@ -37,5 +39,43 @@ export class ConfigService {
       throw new Error('PUBLIC_KEY is not defined in the environment variables');
     }
     return publicKey;
+  }
+
+  get awsRegion(): string {
+    const awsRegion = this.config.get<string>('AWS_REGION');
+    if (!awsRegion) {
+      throw new Error('AWS_REGION is not defined in the environment variables');
+    }
+    return awsRegion;
+  }
+
+  get awsAccessKey(): string {
+    const awsAccessKey = this.config.get<string>('AWS_ACCESS_KEY');
+    if (!awsAccessKey) {
+      throw new Error(
+        'AWS_ACCESS_KEY is not defined in the environment variables',
+      );
+    }
+    return awsAccessKey;
+  }
+
+  get awsSecretAccessKey(): string {
+    const awsSecretAccessKey = this.config.get<string>('AWS_SECRET_ACCESS_KEY');
+    if (!awsSecretAccessKey) {
+      throw new Error(
+        'AWS_SECRET_ACCESS_KEY is not defined in the environment variables',
+      );
+    }
+    return awsSecretAccessKey;
+  }
+
+  get bucketName(): string {
+    const bucketName = this.config.get<string>('BUCKET_NAME');
+    if (!bucketName) {
+      throw new Error(
+        'BUCKET_NAME is not defined in the environment variables',
+      );
+    }
+    return bucketName;
   }
 }
