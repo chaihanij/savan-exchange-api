@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN npm update -g npm && npm install -g pnpm
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 
 RUN pnpm install
 
@@ -19,7 +19,6 @@ RUN npm update -g npm && npm install -g pnpm
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package.json ./
-COPY --from=build /app/package-lock.json ./
 
 RUN pnpm install --prod
 
