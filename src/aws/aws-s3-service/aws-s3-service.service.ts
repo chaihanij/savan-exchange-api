@@ -7,7 +7,7 @@ export class AwsS3ServiceService {
   awsRegion: string;
   awsAccessKey: string;
   awsSecretAccessKey: string;
-  bucketName: string;
+  awsBucketName: string;
 
   private s3: S3;
 
@@ -15,7 +15,7 @@ export class AwsS3ServiceService {
     this.awsRegion = this.config.awsRegion;
     this.awsAccessKey = this.config.awsAccessKey;
     this.awsSecretAccessKey = this.config.awsSecretAccessKey;
-    this.bucketName = this.config.bucketName;
+    this.awsBucketName = this.config.awsBucketName;
     this.s3 = new S3({
       region: this.awsRegion,
       credentials: {
@@ -32,7 +32,7 @@ export class AwsS3ServiceService {
   ): Promise<string> {
     const result = await this.s3
       .upload({
-        Bucket: this.bucketName,
+        Bucket: this.awsBucketName,
         Key: key,
         Body: buffer,
         ContentType: contentType,

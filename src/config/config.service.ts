@@ -69,13 +69,13 @@ export class ConfigService {
     return awsSecretAccessKey;
   }
 
-  get bucketName(): string {
-    const bucketName = this.config.get<string>('BUCKET_NAME');
-    if (!bucketName) {
+  get awsBucketName(): string {
+    const awsBucketName = this.config.get<string>('AWS_BUCKET_NAME');
+    if (!awsBucketName) {
       throw new Error(
         'BUCKET_NAME is not defined in the environment variables',
       );
     }
-    return bucketName;
+    return awsBucketName;
   }
 }
