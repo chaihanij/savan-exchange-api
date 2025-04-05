@@ -58,7 +58,7 @@ jobs:
           ECS_TASK_DEFINITION_PATH=${{ env.ECS_TASK_DEFINITION_PATH }}
           aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} \
           --query taskDefinition > ${ECS_TASK_DEFINITION_PATH}
-          if [ ! -f "ECS_TASK_DEFINITION_PATH" ]; then
+          if [ ! -f "$ECS_TASK_DEFINITION_PATH" ]; then
             echo "❌ ไม่พบไฟล์ $ECS_TASK_DEFINITION_PATH"
             exit 1
           fi
