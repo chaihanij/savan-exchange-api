@@ -12,4 +12,4 @@ docker run -it --rm -p 3000:3000 \
  -e AWS_ACCESS_KEY=AKIA56SZP5WB7BALDV5G \
  -e AWS_SECRET_ACCESS_KEY=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 \
  -e AWS_REGION=ap-southeast-1 \
- -e AWS_BUCKET_NAME=savan-finfin-develop savan-exchange-api /bin/sh
+ -e AWS_BUCKET_NAME=savan-finfin-develop savan-exchange-api
