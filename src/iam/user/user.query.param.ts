@@ -3,6 +3,10 @@ import { PaginationSortOrderParams } from '../../helpers';
 import { UserSortOrder, UserSortOrderKey } from './schemas/user.schema';
 
 export class UserQueryParam extends PaginationSortOrderParams {
+  @IsOptional()
+  @IsString()
+  search?: string;
+
   @IsString()
   @IsOptional()
   uuid?: string;
@@ -17,11 +21,11 @@ export class UserQueryParam extends PaginationSortOrderParams {
 
   @IsString()
   @IsOptional()
-  accountType?: number;
+  userType?: string;
 
   @IsString()
   @IsOptional()
-  orgUuid?: string;
+  organizationUuid?: string;
 
   getUserSortOrder(): UserSortOrder | undefined {
     const sortOrder = this.getSortOrder();

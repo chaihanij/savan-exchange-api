@@ -7,12 +7,14 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService, UserServiceOptions } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { HashingService } from '../hashing/hashing.service';
+import { HashingService } from './hashing/hashing.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
@@ -25,8 +27,9 @@ import {
   PaginatedResponse,
   PaginatedResponseDecorator,
 } from '../../helpers';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller('user')
+@Controller('users')
 @ApiTags('User')
 export class UserController {
   constructor(
@@ -34,13 +37,14 @@ export class UserController {
     private hashingService: HashingService,
   ) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create a new user' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Successfully created user',
     type: User,
   })
+  @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     try {
       if (createUserDto.password) {

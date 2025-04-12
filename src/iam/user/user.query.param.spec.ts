@@ -1,4 +1,4 @@
-import { UserQueryParam } from './user-query-param';
+import { UserQueryParam } from './user.query.param';
 
 describe('UserQueryParam', () => {
   it('should be defined', () => {
@@ -25,13 +25,11 @@ describe('UserQueryParam', () => {
     userQueryParam.uuid = 'uuid';
     userQueryParam.username = 'username';
     userQueryParam.email = 'email';
-    userQueryParam.accountType = 1;
-    
+
     expect(userQueryParam.getFilter()).toEqual({
       uuid: 'uuid',
       username: 'username',
       email: 'email',
-      accountType: 1,
     });
   });
   
@@ -39,7 +37,7 @@ describe('UserQueryParam', () => {
     const userQueryParam = new UserQueryParam();
     userQueryParam.page = 1;
     userQueryParam.pageSize = 10;
-    
+
     expect(userQueryParam.getPagination()).toEqual({
       limit: 10,
       skip: 0,

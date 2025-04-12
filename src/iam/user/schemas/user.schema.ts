@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SortOrder } from 'mongoose';
-import { randomUUID } from 'crypto';
-import { AccountType } from '../enums/account-type.enum';
+import { randomBytes, randomUUID } from 'crypto';
 import { ApiProperty } from '@nestjs/swagger';
+import { IUser, UserType } from '../interfaces/user.interface';
+import { compare } from 'bcrypt';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -13,40 +14,40 @@ export type UserDocument = HydratedDocument<User>;
   },
   toObject: { virtuals: true },
 })
-export class User {
+export class User implements IUser {
+  @ApiProperty({
+    example: '8773c280-f1c6-441c-bab9-e1aa76a55cf1',
+    description: 'The uuid of user',
+  })
   @Prop({
     default: () => {
       return randomUUID();
     },
   })
-  @ApiProperty({
-    example: '8773c280-f1c6-441c-bab9-e1aa76a55cf1',
-    description: 'The uuid of user',
-  })
   uuid: string;
 
-  @Prop({
-    required: true,
-    unique: true,
-  })
   @ApiProperty({
     example: 'admin',
     description: 'The username of user',
   })
+  @Prop({
+    required: true,
+    unique: true,
+  })
   username: string;
 
-  @Prop()
   @ApiProperty({
     example: 'email@emai.com',
     description: 'The email of the user',
   })
+  @Prop()
   email: string;
 
-  @Prop()
   @ApiProperty({
     example: '123456789',
     description: 'The telephone number of the user',
   })
+  @Prop()
   tel: string;
 
   @Prop()
@@ -63,86 +64,116 @@ export class User {
   })
   firstName: string;
 
-  @Prop()
   @ApiProperty({
     example: 'Doe',
     description: 'The last name of the user',
   })
+  @Prop()
   lastName: string;
 
-  @Prop()
-  @ApiProperty({
-    example: ['8773c280-f1c6-441c-bab9-e1aa76a55cf1'],
-    description: 'The roleUuids of the user',
-  })
-  roleUuids: string[];
-
-  @Prop()
   @ApiProperty({
     example: '2021-09-01T00:00:00.000Z',
     description: 'The roles of the user',
   })
+  @Prop()
   lastLoginAt: Date;
 
-  @Prop({
-    default: () => {
-      return AccountType.USER;
-    },
-    type: [{ type: Number, enum: AccountType }],
-  })
   @ApiProperty({
-    example: AccountType.USER,
-    description: 'The account type of the user',
+    example: 'superAdmin',
+    description: 'The type of user',
+    enum: UserType,
   })
-  accountType: AccountType;
-
   @Prop()
+  userType: UserType;
+
   @ApiProperty({
     example: '8773c280-f1c6-441c-bab9-e1aa76a55cf1',
-    description: 'The orgUuid of user',
+    description: 'The uuid of the organization',
   })
-  orgUuid: string;
+  @Prop()
+  organizationUuid?: string;
 
+  @ApiProperty({
+    example: '2021-09-01T00:00:00.000Z',
+    description: 'The date when the user registered',
+  })
+  @Prop()
+  registeredAt?: Date;
+
+  @ApiProperty({
+    example: 'true',
+    description: 'The activation status of the user',
+  })
+  @Prop()
+  isActivated: boolean;
+
+  @ApiProperty({
+    example: 'true',
+    description: 'The verification status of the user',
+  })
+  @Prop()
+  isVerified: boolean;
+
+  @ApiProperty({
+    example: '123456789',
+    description: 'The refresh token of the user',
+  })
+  @Prop({
+    default: () => {
+      return randomBytes(32).toString('hex');
+    },
+  })
+  refreshToken?: string;
+
+  @ApiProperty({
+    example: '123456789',
+    description: 'The profile image of the user',
+  })
+  @Prop()
+  imageKey: string;
+
+  @ApiProperty({
+    example: '123456789',
+    description: 'The profile image of the user',
+  })
+  @Prop()
+  imageUrl: string;
+
+  @ApiProperty({
+    example: '2021-09-01T00:00:00.000Z',
+    description: 'The date when the user was created',
+  })
   @Prop()
   createdAt: Date;
 
+  @ApiProperty({
+    example: '2021-09-01T00:00:00.000Z',
+    description: 'The date when the user was updated',
+  })
   @Prop()
   updatedAt: Date;
+
+  @ApiProperty({
+    example: '8773c280-f1c6-441c-bab9-e1aa76a55cf1',
+    description: 'The uuid of the user who created this user',
+  })
+  @Prop()
+  createdByUuid: string;
+
+  @ApiProperty({
+    example: '8773c280-f1c6-441c-bab9-e1aa76a55cf1',
+    description: 'The uuid of the user who updated this user',
+  })
+  @Prop()
+  updatedByUuid: string;
+
+  validatePassword(password: string): Promise<boolean> {
+    return compare(password, this.password);
+  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.virtual('roles', {
-  ref: 'Role',
-  localField: 'roleUuids',
-  foreignField: 'uuid',
-  justOne: false,
-});
-
-UserSchema.virtual('org', {
-  ref: 'Org',
-  localField: 'orgUuid',
-  foreignField: 'uuid',
-  justOne: true,
-  options: { select: { uuid: 1, name: 1 } },
-});
-
-export type UserProjection = {
-  _id?: number;
-  uuid?: number;
-  username?: number;
-  email?: number;
-  tel?: number;
-  password?: number;
-  firstName?: number;
-  lastName?: number;
-  roleUuids?: number;
-  roles?: number;
-  lastLoginAt?: number;
-  accountType?: number;
-  orgUuid?: number;
-  createdAt?: number;
-  updatedAt?: number;
-};
 
 export const UserSortOrderKey = ['createdAt', 'updatedAt'];
+
 export type UserSortOrder = Record<string, SortOrder>;

@@ -1,0 +1,87 @@
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { SignUpDto } from './dtos/sign-up.dto';
+import { SignInDto } from './dtos/sign-in.dto';
+import { UnauthorizedException } from './auth.exception';
+import { INVALID_PASSWORD } from './auth.constant';
+import { UserService } from 'src/iam/user/user.service';
+import { HashingService } from 'src/iam/user/hashing/hashing.service';
+import { AppException } from '../helpers';
+import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '../iam/user/user.constant';
+import { IProfile } from './interfaces';
+import { AwsService } from '../aws/aws.service';
+
+@Injectable()
+export class AuthService {
+  logger = new Logger(AuthService.name);
+
+  constructor(
+    private userService: UserService,
+    private hashingService: HashingService,
+    private jwtService: JwtService,
+    private awsService: AwsService,
+  ) {}
+
+  async signUp(input: SignUpDto) {
+    try {
+      const user = await this.userService.findOne({
+        username: input.username,
+      });
+      if (user) {
+        const e = new AppException(HttpStatus.CONFLICT, USER_ALREADY_EXISTS);
+        return Promise.reject(e);
+      }
+      const hashedPassword = await this.hashingService.hash(input.password);
+      return await this.userService.create({
+        username: input.username,
+        password: hashedPassword,
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async signIn(input: SignInDto) {
+    try {
+      const user = await this.userService.update(
+        {
+          username: input.username,
+        },
+        { lastLoginAt: new Date() },
+        { isPopulate: true },
+      );
+      if (!user) {
+        const e = new AppException(HttpStatus.NOT_FOUND, USER_NOT_FOUND);
+        return Promise.reject(e);
+      }
+      const isPasswordMatch = await this.hashingService.compare(
+        input.password,
+        user.password,
+      );
+      if (!isPasswordMatch) {
+        const e = UnauthorizedException(INVALID_PASSWORD);
+        return Promise.reject(e);
+      }
+      const profile: IProfile = {
+        uuid: user.uuid,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      };
+      profile.accessToken = this.jwtService.sign(profile);
+      if (user.imageKey) {
+        profile.imageUrl = await this.awsService.getSignedUrl(user.imageKey);
+      }
+      return profile;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, e.message);
+    }
+  }
+
+  verifyToken(token: string) {
+    return this.jwtService.verify(token);
+  }
+}

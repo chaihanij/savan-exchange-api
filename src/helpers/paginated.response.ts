@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from '@nestjs/common';
+import { HttpStatus, Type } from '@nestjs/common';
 
 export class PaginatedResponse<T> {
   @ApiProperty({
@@ -45,14 +45,34 @@ export class PaginatedResponse<T> {
 }
 
 export function PaginatedResponseDecorator<T extends Type<any>>(data: T) {
+  console.log('PaginatedResponseDecorator', data.name);
   return {
-    type: PaginatedResponse,
+    type: PaginatedResponse<T>,
+    status: HttpStatus.OK,
+    description: `Successfully retrieved for ${data.name}`,
+    isArray: false,
     schema: {
       properties: {
-        total: { type: 'number' },
-        page: { type: 'number' },
-        pageSize: { type: 'number' },
-        data: { $ref: `#/components/schemas/${data.name}` },
+        total: {
+          type: 'number',
+          description: 'The total number of data',
+          example: 10,
+        },
+        page: {
+          type: 'number',
+          description: 'The page number',
+          example: 1,
+        },
+        pageSize: {
+          type: 'number',
+          description: 'The page size',
+          example: 10,
+        },
+        data: {
+          type: 'array',
+          description: 'The data of page',
+          $ref: `#/components/schemas/${data.name}`,
+        },
       },
     },
   };

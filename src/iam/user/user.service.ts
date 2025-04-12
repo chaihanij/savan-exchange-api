@@ -30,7 +30,7 @@ export class UserService {
     filter: RootFilterQuery<any>,
     options: UserServiceOptions | undefined = undefined,
   ): Promise<User[]> {
-    const query = this.model.find(filter).select({ __v: 0, _id: 0 });
+    const query = this.model.find(filter, { __v: 0, _id: 0 });
 
     if (options?.sort) {
       query.sort(options.sort);
@@ -42,12 +42,10 @@ export class UserService {
 
     if (options?.isPopulate) {
       query
-        .populate('createdBy')
-        .populate('updatedBy')
-        .populate('org')
-        .populate('roles');
+        .populate('createdByUuid', { uuid: 1, username: 1 })
+        .populate('updatedByUuid', { uuid: 1, username: 1 });
     }
-    return this.model.find(filter).exec();
+    return query.exec();
   }
 
   async findOne(
@@ -58,14 +56,11 @@ export class UserService {
 
     if (options?.isPopulate) {
       query
-        .populate('createdBy')
-        .populate('updatedBy')
-        .populate('org')
-        .populate('roles');
+        .populate('createdByUuid', { uuid: 1, username: 1 })
+        .populate('updatedByUuid', { uuid: 1, username: 1 });
     }
-
-    const user = await this.model.findOne(filter).exec();
-    return user as User;
+    
+    return (await query.exec()) as User;
   }
 
   async update(
@@ -73,14 +68,14 @@ export class UserService {
     update: UpdateQuery<any>,
     options: UserServiceOptions | undefined = undefined,
   ): Promise<User> {
-    const query = this.model.findOneAndUpdate(filter, update, { new: true });
+    const query = this.model
+      .findOneAndUpdate(filter, update, { new: true })
+      .select({ __v: 0, _id: 0 });
 
     if (options?.isPopulate) {
       query
-        .populate('createdBy')
-        .populate('updatedBy')
-        .populate('org')
-        .populate('roles');
+        .populate('createdByUuid', { uuid: 1, username: 1 })
+        .populate('updatedByUuid', { uuid: 1, username: 1 });
     }
 
     const user = await query.exec();
