@@ -1,6 +1,6 @@
 import { CommonQueryDto } from '../../shared/dto/common-query.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEmpty, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class FilterPolicyDto extends CommonQueryDto {
   @ApiPropertyOptional()
@@ -15,7 +15,9 @@ export class FilterPolicyDto extends CommonQueryDto {
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
-  @IsBoolean()
-  @IsEmpty()
   isSystemRole?: boolean;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  isDeleted?: boolean;
 }

@@ -8,5 +8,6 @@ import { Policy, PolicySchema } from '../shared/schemas/policy.shcema';
   imports: [MongooseModule.forFeature([{ name: Policy.name, schema: PolicySchema }])],
   controllers: [PolicyController],
   providers: [PolicyService],
+  exports: [PolicyService],
 })
 export class PolicyModule {}

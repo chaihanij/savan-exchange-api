@@ -20,6 +20,9 @@ export class PolicyResponseDto {
   @ApiProperty({ type: [PolicyStatementDto] })
   statements: PolicyStatementDto[];
 
+  @ApiProperty({ example: false })
+  isDeleted: boolean;
+
   @ApiProperty({ example: '2025-04-10T00:00:00.000Z' })
   createdAt: Date;
 

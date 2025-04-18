@@ -1,13 +1,15 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TenantService } from './tenant.service';
 import { CreateTenantDto, FilterTenantDto, TenantResponseDto, UpdateTenantDto } from './dto';
-import { ResponseWrapper } from '../shared/utils';
-import { AppException } from '../helpers';
+import { AppException, ResponseWrapper } from '../shared/utils';
+import { handleError } from '../shared/utils/handle-error';
 
 @ApiTags('Tenant')
 @Controller('tenant')
 export class TenantController {
+  logger = new Logger(TenantController.name);
+
   constructor(private readonly tenantService: TenantService) {}
 
   @Post()
@@ -20,7 +22,7 @@ export class TenantController {
     try {
       return await this.tenantService.create(createTenantDto);
     } catch (error) {
-      this.handleError(error, 'An error occurred while creating the tenant');
+      handleError(error, 'An error occurred while creating the tenant');
     }
   }
 
@@ -41,7 +43,7 @@ export class TenantController {
       },
     },
   })
-  async find(@Query() filterTenantDto: FilterTenantDto): Promise<ResponseWrapper<TenantResponseDto[]>> {
+  async find(@Query() filterTenantDto: FilterTenantDto): Promise<void | ResponseWrapper<TenantResponseDto[]>> {
     try {
       const [total, data] = await Promise.all([
         this.tenantService.count(filterTenantDto),
@@ -49,7 +51,9 @@ export class TenantController {
       ]);
       return new ResponseWrapper<TenantResponseDto[]>(data, total, filterTenantDto.limit, filterTenantDto.skip);
     } catch (error) {
-      this.handleError(error, 'An error occurred while retrieving tenants');
+      this.logger.error(error);
+      handleError(error, 'An error occurred while retrieving tenants');
+      return;
     }
   }
 
@@ -67,7 +71,7 @@ export class TenantController {
       }
       return result;
     } catch (error) {
-      this.handleError(error, 'An error occurred while retrieving the tenant');
+      handleError(error, 'An error occurred while retrieving the tenant');
     }
   }
 
@@ -82,7 +86,7 @@ export class TenantController {
     try {
       return await this.tenantService.update({ tenantId } as FilterTenantDto, updateTenantDto);
     } catch (error) {
-      this.handleError(error, 'An error occurred while updating the tenant');
+      handleError(error, 'An error occurred while updating the tenant');
     }
   }
 
@@ -96,17 +100,7 @@ export class TenantController {
     try {
       return await this.tenantService.update({ tenantId } as FilterTenantDto, { isDeleted: true } as UpdateTenantDto);
     } catch (error) {
-      this.handleError(error, 'An error occurred while deleting the tenant');
-    }
-  }
-
-  private handleError(error: any, defaultMessage: string): never {
-    if (error instanceof AppException) {
-      throw error;
-    } else if (error?.code === 11000) {
-      throw new AppException(HttpStatus.CONFLICT, 'Duplicate key error: already exists');
-    } else {
-      throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, defaultMessage);
+      handleError(error, 'An error occurred while deleting the tenant');
     }
   }
 }

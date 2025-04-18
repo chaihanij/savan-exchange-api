@@ -1,18 +1,10 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dtos/sign-up.dto';
-import { SignInDto } from './dtos/sign-in.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { User } from '../iam/user/schemas/user.schema';
+import { SignInDto, SignUpDto } from './dtos';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from './auth.guard';
+import { AccountDecorator } from '../shared/decorators/account.decorator';
+import { AccountWithRolesAndPoliciesDto } from '../account/dto';
 
 @Controller()
 export class AuthController {
@@ -21,28 +13,26 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'SignUp' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: User,
-  })
   @Post('signup')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
   async signUp(@Body() signUpDto: SignUpDto) {
     return await this.authService.signUp(signUpDto);
   }
-  
+
   @ApiOperation({ summary: 'SignIn' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: User,
-  })
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
   async signIn(@Body() signInDto: SignInDto) {
     return await this.authService.signIn(signInDto);
   }
-  
-  
+
+  @ApiOperation({ summary: 'Get account details' })
+  @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
+  @Get('account')
+  @HttpCode(HttpStatus.OK)
+  async getAccountDetails(@AccountDecorator() account: AccountWithRolesAndPoliciesDto) {
+    this.logger.log('Account details retrieved successfully');
+    return account;
+  }
 }

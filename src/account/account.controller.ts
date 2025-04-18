@@ -1,16 +1,22 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 import { AccountResponseDto, CreateAccountDto, FilterAccountDto, UpdateAccountDto } from './dto';
 import { AppException, ResponseWrapper } from '../shared/utils';
 import { AccountStatus } from '../shared/interfaces';
+import { AuthGuard, PoliciesGuard } from '../auth';
+import { CheckPolicy } from '../shared/decorators/check-policy.decorator';
+import { ActionEnum, ResourceEnum } from '../shared/resources';
 
 @ApiTags('Accounts')
 @Controller('accounts')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
+  @UseGuards(AuthGuard, PoliciesGuard)
+  @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Post()
+  @ApiBearerAuth('token')
   @ApiOperation({ summary: 'Create a new account' })
   @ApiBody({ type: CreateAccountDto })
   @ApiResponse({ status: 201, description: 'Account created successfully', type: AccountResponseDto })
@@ -24,7 +30,10 @@ export class AccountController {
     }
   }
 
+  @UseGuards(AuthGuard, PoliciesGuard)
+  @CheckPolicy(ActionEnum.Read, ResourceEnum.Account)
   @Get()
+  @ApiBearerAuth('token')
   @ApiOperation({ summary: 'Get a list of accounts with filters' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
@@ -50,7 +59,10 @@ export class AccountController {
     }
   }
 
+  @UseGuards(AuthGuard, PoliciesGuard)
+  @CheckPolicy(ActionEnum.Read, ResourceEnum.Account)
   @Get(':accountId')
+  @ApiBearerAuth('token')
   @ApiOperation({ summary: 'Get an account by ID' })
   @ApiParam({ name: 'accountId', description: 'Account ID' })
   @ApiResponse({ status: 200, description: 'Account retrieved successfully', type: AccountResponseDto })
@@ -68,7 +80,10 @@ export class AccountController {
     }
   }
 
+  @UseGuards(AuthGuard, PoliciesGuard)
+  @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Patch(':accountId')
+  @ApiBearerAuth('token')
   @ApiOperation({ summary: 'Update an account by ID' })
   @ApiParam({ name: 'accountId', description: 'Account ID' })
   @ApiBody({ type: UpdateAccountDto })
@@ -83,7 +98,10 @@ export class AccountController {
     }
   }
 
+  @UseGuards(AuthGuard, PoliciesGuard)
+  @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Delete(':accountId')
+  @ApiBearerAuth('token')
   @ApiOperation({ summary: 'Soft delete an account by ID' })
   @ApiParam({ name: 'accountId', description: 'Account ID' })
   @ApiResponse({ status: 200, description: 'Account deleted successfully (soft delete)', type: AccountResponseDto })

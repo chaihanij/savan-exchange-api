@@ -30,6 +30,53 @@ export class BuilderMongoOperationQuery<T> {
     return Object.keys(filterEquals).length > 0 ? filterEquals : undefined;
   }
 
+  private static parseAdvancedFilters(filterStrings: string[] = []): Record<string, any> {
+    const filters: Record<string, any> = {};
+
+    for (const raw of filterStrings) {
+      const match = raw.match(/^([a-zA-Z0-9_.]+)(!?=|>=|<=|>|<|=|in:|nin:)(.+)$/);
+      if (!match) continue;
+
+      let [, field, operator, rawValue] = match;
+      let value: any = rawValue.trim();
+
+      // support array in in/nin
+      if (operator.includes('in:')) {
+        value = value.split(',').map(v => v.trim());
+      }
+
+      const mongoOp = (() => {
+        switch (operator) {
+          case '=':
+            return '$eq';
+          case '!=':
+            return '$ne';
+          case '>':
+            return '$gt';
+          case '>=':
+            return '$gte';
+          case '<':
+            return '$lt';
+          case '<=':
+            return '$lte';
+          case 'in:':
+            return '$in';
+          case 'nin:':
+            return '$nin';
+          default:
+            return undefined;
+        }
+      })();
+
+      if (!mongoOp) continue;
+
+      if (!filters[field]) filters[field] = {};
+      filters[field][mongoOp] = value;
+    }
+
+    return filters;
+  }
+
   buildOptions(): BuilderMongoOperationQueryOptions {
     const equals = BuilderMongoOperationQuery.filterEquals(this.data as Record<string, any>);
     return {
@@ -46,6 +93,12 @@ export class BuilderMongoOperationQuery<T> {
     if (searchFields && searchKeyword) {
       const regex = { $regex: searchKeyword, $options: 'i' };
       filters.$or = searchFields.map(field => ({ [field]: regex }));
+    }
+
+    const advancedFilter = (this.data as any).filters;
+    if (Array.isArray(advancedFilter)) {
+      const advanced = BuilderMongoOperationQuery.parseAdvancedFilters(advancedFilter);
+      Object.assign(filters, advanced);
     }
 
     return filters;

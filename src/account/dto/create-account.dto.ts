@@ -16,7 +16,7 @@ export class CreateAccountDto {
   @ApiProperty({ example: 'john.doe@example.com' })
   @IsEmail()
   @IsOptional()
-  email: string;
+  email?: string;
 
   @ApiProperty({ example: 'plain-password' })
   @IsString()

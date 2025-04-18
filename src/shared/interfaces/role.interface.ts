@@ -9,6 +9,7 @@ export interface RoleInterface {
   isSystemRole: boolean;
   policyIds: string[];
   assignableTo: AccountTypeEnum[];
+  isDeleted: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

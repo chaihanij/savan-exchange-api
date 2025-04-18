@@ -3,27 +3,46 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { SortOrder } from 'mongoose';
 
+const splitToArray = (value: any, separator = ','): string[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string')
+    return value
+      .split(separator)
+      .map(v => v.trim())
+      .filter(Boolean);
+  return [];
+};
+
+const toInt = (value: any): number | undefined => {
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? undefined : parsed;
+};
+
 export class CommonQueryDto {
-  @ApiPropertyOptional({ description: 'Search keyword', example: 'keyword' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiPropertyOptional({
-    description: 'Sort order (e.g., name,-createdAt)',
-    example: 'name,-createdAt',
-    type: String,
+    description: 'Advanced filter (e.g. status=in:active,pending;age>=18)',
   })
+  @Transform(({ value }) => splitToArray(value, ';'))
   @IsOptional()
+  filters?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Sort order (e.g., name,-createdAt)',
+  })
   @Transform(({ value }) => (Array.isArray(value) ? value.join(',') : value))
+  @IsOptional()
   @IsString()
   orders?: string;
 
   @ApiPropertyOptional({
-    description: 'Comma-separated fields to include',
-    example: 'field1,field2,field3,...',
+    description: 'Comma-separated fields to include (example: field1,field2,field3)',
   })
-  @Transform(({ value }) => (Array.isArray(value) ? value : (value?.split(',') ?? [])))
+  @Transform(({ value }) => splitToArray(value))
   @IsOptional()
   select?: string[];
 
@@ -32,7 +51,7 @@ export class CommonQueryDto {
     example: 0,
     minimum: 0,
   })
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }) => toInt(value))
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -44,7 +63,7 @@ export class CommonQueryDto {
     minimum: 1,
     maximum: 100,
   })
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }) => toInt(value))
   @IsOptional()
   @IsNumber()
   @Min(1)
@@ -53,16 +72,18 @@ export class CommonQueryDto {
 
   getOrders(allowedFields?: string[]): Record<string, SortOrder> | undefined {
     if (!this.orders) return undefined;
-    const sortOrder: Record<string, SortOrder> = {};
-    const orders = this.orders.split(',');
-    for (const order of orders) {
-      const direction = order.startsWith('-') ? 'desc' : 'asc';
-      const field = order.replace(/^-/, '').trim();
-      if (!field) continue;
-      if (allowedFields && !allowedFields.includes(field)) continue;
-      sortOrder[field] = direction as SortOrder;
-    }
-    return sortOrder;
+
+    return this.orders.split(',').reduce(
+      (acc, order) => {
+        const direction: SortOrder = order.startsWith('-') ? 'desc' : 'asc';
+        const field = order.replace(/^-/, '').trim();
+        if (field && (!allowedFields || allowedFields.includes(field))) {
+          acc[field] = direction;
+        }
+        return acc;
+      },
+      {} as Record<string, SortOrder>,
+    );
   }
 
   getSelectedFields(): Record<string, 1> | undefined {
@@ -75,5 +96,17 @@ export class CommonQueryDto {
       },
       {} as Record<string, 1>,
     );
+  }
+
+  getPagination(defaultLimit = 10): { skip: number; limit: number } {
+    return {
+      skip: typeof this.skip === 'number' ? this.skip : 0,
+      limit: typeof this.limit === 'number' ? this.limit : defaultLimit,
+    };
+  }
+
+  getFilters(): string[] | undefined {
+    if (!this.filters || this.filters.length === 0) return undefined;
+    if (Array.isArray(this.filters)) return this.filters;
   }
 }

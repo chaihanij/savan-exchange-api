@@ -4,12 +4,11 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '../config';
 import { AuthGuard } from './auth.guard';
-import { UserService } from '../iam/user/user.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '../iam/user/schemas/user.schema';
-import { HashingService } from '../iam/user/hashing/hashing.service';
-import { BcryptService } from '../iam/user/hashing/bcrypt.service';
-import { AwsModule } from '../aws/aws.module';
+import { Account, AccountSchema } from '../shared/schemas/account.schema';
+import { AccountService } from '../account/account.service';
+import { BcryptService } from '../shared/services';
+import { PoliciesGuard } from './policies.guard';
 
 @Module({
   imports: [
@@ -32,22 +31,13 @@ import { AwsModule } from '../aws/aws.module';
     }),
     MongooseModule.forFeature([
       {
-        name: User.name,
-        schema: UserSchema,
+        name: Account.name,
+        schema: AccountSchema,
       },
     ]),
-    AwsModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    UserService,
-    {
-      provide: HashingService,
-      useClass: BcryptService,
-    },
-    AuthGuard,
-  ],
-  exports: [AuthService, AuthGuard],
+  providers: [AuthService, AccountService, BcryptService, AuthGuard, PoliciesGuard],
+  exports: [AuthService, AuthGuard, PoliciesGuard],
 })
 export class AuthModule {}

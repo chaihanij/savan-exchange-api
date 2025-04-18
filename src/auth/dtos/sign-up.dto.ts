@@ -12,7 +12,7 @@ export class SignUpDto {
   username: string;
 
   @ApiProperty({
-    example: 'P@ssw0rd',
+    example: 'password',
     description: 'The password of user',
     required: true,
   })
@@ -31,29 +31,11 @@ export class SignUpDto {
   email: string;
 
   @ApiProperty({
-    example: 'Nguyen',
+    example: 'Nguyen Van',
     description: 'The first name of user',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  firstName: string;
-
-  @ApiProperty({
-    example: 'Van',
-    description: 'The last name of user',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @ApiProperty({
-    example: '1234567890',
-    description: 'The phone number of user',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  tel: string;
+  name: string;
 }

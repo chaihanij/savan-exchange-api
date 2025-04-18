@@ -64,4 +64,60 @@ describe('BuilderMongoOperationQuery', () => {
       expect(builder.getPagination()).toEqual({ limit: 20, skip: 0 });
     });
   });
+  
+  describe('BuilderMongoOperationQuery.parseAdvancedFilters', () => {
+    it('should parse equality filter', () => {
+      const filters = ['status=active'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({
+        status: { $eq: 'active' },
+      });
+    });
+
+    it('should parse inequality (!=)', () => {
+      const filters = ['type!=admin'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({
+        type: { $ne: 'admin' },
+      });
+    });
+
+    it('should parse greater than and less than', () => {
+      const filters = ['createdAt>2023-01-01', 'age<50'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({
+        createdAt: { $gt: '2023-01-01' },
+        age: { $lt: '50' },
+      });
+    });
+
+    it('should parse in and nin', () => {
+      const filters = ['role=in:user,admin', 'status=nin:banned,inactive'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({
+        role: { $in: ['user', 'admin'] },
+        status: { $nin: ['banned', 'inactive'] },
+      });
+    });
+
+    it('should handle multiple operators on same field', () => {
+      const filters = ['age>18', 'age<60'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({
+        age: { $gt: '18', $lt: '60' },
+      });
+    });
+
+    it('should ignore invalid filter format', () => {
+      const filters = ['invalidfilter', 'key'];
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({});
+    });
+
+    it('should ignore unknown operators', () => {
+      const filters = ['field!==value']; // !== not supported
+      const result = BuilderMongoOperationQuery['parseAdvancedFilters'](filters);
+      expect(result).toEqual({});
+    });
+  });
 });

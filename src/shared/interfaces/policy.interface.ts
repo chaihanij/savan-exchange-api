@@ -19,7 +19,8 @@ export interface PolicyInterface {
   name: string;
   description: string;
   isSystemRole: boolean;
-  statements: any;
+  statements: any | PolicyStatementInterface[];
+  isDeleted: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -2,15 +2,14 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from './config';
-import { IamModule } from './iam/iam.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TerminusModule } from '@nestjs/terminus';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
-import { ProfileModule } from './profile/profile.module';
 import { TenantModule } from './tenant/tenant.module';
 import { AccountModule } from './account/account.module';
 import { PolicyModule } from './policy/policy.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -36,11 +35,10 @@ import { PolicyModule } from './policy/policy.module';
       inject: [ConfigService],
     }),
     AuthModule,
-    IamModule,
-    ProfileModule,
     TenantModule,
     AccountModule,
     PolicyModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

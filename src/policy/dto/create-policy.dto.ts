@@ -58,4 +58,9 @@ export class CreatePolicyDto {
   @ValidateNested({ each: true })
   @Type(() => PolicyStatementDto)
   statements: PolicyStatementDto[];
+
+  @ApiPropertyOptional({ example: false })
+  @IsBoolean()
+  @IsOptional()
+  isDeleted?: boolean;
 }

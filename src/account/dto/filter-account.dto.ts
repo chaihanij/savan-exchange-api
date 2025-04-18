@@ -4,42 +4,42 @@ import { AccountStatus, AccountTypeEnum } from '../../shared/interfaces';
 import { CommonQueryDto } from '../../shared/dto/common-query.dto';
 
 export class FilterAccountDto extends CommonQueryDto {
-  @ApiPropertyOptional({ example: 'tenant-001' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   accountId?: string;
 
-  @ApiPropertyOptional({ example: 'tenant-001' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiPropertyOptional({ enum: AccountStatus, example: AccountStatus.Pending })
+  @ApiPropertyOptional({ enum: AccountStatus })
   @IsOptional()
   @IsEnum(AccountStatus)
   status?: AccountStatus;
 
-  @ApiPropertyOptional({ enum: AccountTypeEnum, example: AccountTypeEnum.Admin })
+  @ApiPropertyOptional({ enum: AccountTypeEnum })
   @IsOptional()
   @IsEnum(AccountTypeEnum)
   accountType?: AccountTypeEnum;
 
-  @ApiPropertyOptional({ example: 'google-oauth2-123456' })
+  @ApiPropertyOptional({})
   @IsOptional()
   @IsString()
   username?: string;
 
-  @ApiPropertyOptional({ example: 'john.doe@example.com' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   email?: string;
 
-  @ApiPropertyOptional({ example: 'John' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ example: false })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;

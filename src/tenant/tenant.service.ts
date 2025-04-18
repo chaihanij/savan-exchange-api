@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tenant, TenantDocument } from '../shared/schemas';
@@ -9,13 +9,23 @@ export const searchableFields = ['name', 'description'];
 
 @Injectable()
 export class TenantService {
+  logger = new Logger(TenantService.name);
   constructor(
     @InjectModel(Tenant.name)
     private readonly model: Model<TenantDocument>,
   ) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
-    return await this.model.create(createTenantDto);
+    try {
+      return await this.model.create(createTenantDto);
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new AppException(HttpStatus.BAD_REQUEST, `Tenant already exists ${error.message}`);
+      } else {
+        this.logger.error(error);
+        throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, 'An error occurred while creating the tenant');
+      }
+    }
   }
 
   async count(filterTenantDto: FilterTenantDto): Promise<number> {

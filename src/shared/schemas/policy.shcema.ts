@@ -73,6 +73,10 @@ export class Policy implements PolicyInterface {
   })
   statements: PolicyStatement[];
 
+  @ApiProperty({ example: false })
+  @Prop({ default: false, description: 'Soft delete flag' })
+  isDeleted: boolean;
+
   @ApiProperty({ example: '2025-04-10T00:00:00.000Z', description: 'Created date' })
   createdAt: Date;
 

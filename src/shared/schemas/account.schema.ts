@@ -96,7 +96,7 @@ export class Account implements AccountInterface {
   @ApiProperty({ example: false, description: 'Soft delete status' })
   @Prop({ default: false })
   isDeleted: boolean;
-  
+
   @ApiProperty({ example: '2025-04-10T00:00:00.000Z', description: 'Created date' })
   createdAt: Date;
 
@@ -105,3 +105,20 @@ export class Account implements AccountInterface {
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);
+
+AccountSchema.virtual('roles', {
+  ref: 'Role',
+  localField: 'roleIds',
+  foreignField: 'roleId',
+  justOne: false,
+});
+
+AccountSchema.virtual('policies', {
+  ref: 'Policy',
+  localField: 'policyIds',
+  foreignField: 'policyId',
+  justOne: false,
+});
+
+AccountSchema.set('toJSON', { virtuals: true });
+AccountSchema.set('toObject', { virtuals: true });

@@ -12,7 +12,7 @@ export class SignInDto {
   username: string;
 
   @ApiProperty({
-    example: 'P@ssw0rd',
+    example: 'password',
     description: 'The password of user',
     required: true,
   })
