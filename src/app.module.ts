@@ -10,6 +10,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { AccountModule } from './account/account.module';
 import { PolicyModule } from './policy/policy.module';
 import { RoleModule } from './role/role.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { RoleModule } from './role/role.module';
     AccountModule,
     PolicyModule,
     RoleModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

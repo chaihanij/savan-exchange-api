@@ -8,3 +8,4 @@ export * from './provider.enum';
 export * from './role.interface';
 export * from './tenant.interface';
 export * from './tenant-status.enum';
+export * from './media.interface';
