@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger as NestJSLogger, ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const logger = new NestJSLogger('bootstrap');
@@ -12,6 +13,8 @@ async function bootstrap() {
   app.useLogger(app.get(Logger)); // use Pino logger
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.use(cookieParser());
+
   const config = new DocumentBuilder()
     .setTitle('Savan Exchange API')
     .setDescription('Savan Exchange Friend and Money Transfer API')
@@ -27,8 +30,11 @@ async function bootstrap() {
       },
       'token',
     )
+    .addCookieAuth('accessToken')
+    .addCookieAuth('refreshToken')
     .addTag('API')
     .build();
+  
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, documentFactory);
 

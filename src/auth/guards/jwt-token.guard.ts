@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AppException } from '../shared/utils';
+import { AuthService } from '../auth.service';
+import { AppException } from '../../shared/utils';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  private readonly logger = new Logger(AuthGuard.name);
+export class JwtTokenGuard implements CanActivate {
+  private readonly logger = new Logger(JwtTokenGuard.name);
 
   constructor(private readonly authService: AuthService) {}
 
@@ -18,12 +18,15 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.authService.verifyToken(token); // ✅ async รองรับกรณี future ใช้ Firebase หรือ JWK
-      request.user = payload;
+      request.user = await this.authService.verify(token);
       return true;
-    } catch (error) {
-      this.logger.warn(`Token verification failed: ${error?.message || error}`);
-      throw new AppException(HttpStatus.UNAUTHORIZED, 'Invalid token');
+    } catch (e) {
+      if (e instanceof AppException) {
+        throw e;
+      } else {
+        const msg = e.message || `${JwtTokenGuard.name} unknown error`;
+        throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
+      }
     }
   }
 

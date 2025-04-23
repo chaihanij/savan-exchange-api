@@ -4,7 +4,7 @@ import { AccountService } from './account.service';
 import { AccountResponseDto, CreateAccountDto, FilterAccountDto, UpdateAccountDto } from './dto';
 import { AppException, ResponseWrapper } from '../shared/utils';
 import { AccountStatus } from '../shared/interfaces';
-import { AuthGuard, PoliciesGuard } from '../auth';
+import { JwtTokenGuard, PolicyGuard } from '../auth';
 import { CheckPolicy } from '../shared/decorators/check-policy.decorator';
 import { ActionEnum, ResourceEnum } from '../shared/resources';
 
@@ -13,7 +13,7 @@ import { ActionEnum, ResourceEnum } from '../shared/resources';
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
-  @UseGuards(AuthGuard, PoliciesGuard)
+  @UseGuards(JwtTokenGuard, PolicyGuard)
   @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Post()
   @ApiBearerAuth('token')
@@ -30,7 +30,7 @@ export class AccountController {
     }
   }
 
-  @UseGuards(AuthGuard, PoliciesGuard)
+  @UseGuards(JwtTokenGuard, PolicyGuard)
   @CheckPolicy(ActionEnum.Read, ResourceEnum.Account)
   @Get()
   @ApiBearerAuth('token')
@@ -59,7 +59,7 @@ export class AccountController {
     }
   }
 
-  @UseGuards(AuthGuard, PoliciesGuard)
+  @UseGuards(JwtTokenGuard, PolicyGuard)
   @CheckPolicy(ActionEnum.Read, ResourceEnum.Account)
   @Get(':accountId')
   @ApiBearerAuth('token')
@@ -80,7 +80,7 @@ export class AccountController {
     }
   }
 
-  @UseGuards(AuthGuard, PoliciesGuard)
+  @UseGuards(JwtTokenGuard, PolicyGuard)
   @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Patch(':accountId')
   @ApiBearerAuth('token')
@@ -98,7 +98,7 @@ export class AccountController {
     }
   }
 
-  @UseGuards(AuthGuard, PoliciesGuard)
+  @UseGuards(JwtTokenGuard, PolicyGuard)
   @CheckPolicy(ActionEnum.Write, ResourceEnum.Account)
   @Delete(':accountId')
   @ApiBearerAuth('token')

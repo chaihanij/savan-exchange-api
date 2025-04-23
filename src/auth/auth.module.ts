@@ -3,12 +3,11 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '../config';
-import { AuthGuard } from './auth.guard';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Account, AccountSchema } from '../shared/schemas/account.schema';
 import { AccountService } from '../account/account.service';
 import { BcryptService } from '../shared/services';
-import { PoliciesGuard } from './policies.guard';
+import { AccessTokenGuard, JwtTokenGuard, PolicyGuard, RefreshTokenGuard } from './guards';
 
 @Module({
   imports: [
@@ -21,7 +20,7 @@ import { PoliciesGuard } from './policies.guard';
           publicKey: config.publicKey,
           signOptions: {
             issuer: 'https://svan-ex.co/issuer',
-            expiresIn: '30d',
+            expiresIn: '1d',
             algorithm: 'RS256',
           },
         };
@@ -37,7 +36,15 @@ import { PoliciesGuard } from './policies.guard';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AccountService, BcryptService, AuthGuard, PoliciesGuard],
-  exports: [AuthService, AuthGuard, PoliciesGuard],
+  providers: [
+    AuthService,
+    AccountService,
+    BcryptService,
+    JwtTokenGuard,
+    AccessTokenGuard,
+    RefreshTokenGuard,
+    PolicyGuard,
+  ],
+  exports: [AuthService, JwtTokenGuard, AccessTokenGuard, RefreshTokenGuard, PolicyGuard],
 })
 export class AuthModule {}

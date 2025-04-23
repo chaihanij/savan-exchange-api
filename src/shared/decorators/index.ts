@@ -1,2 +1,2 @@
-export * from './profile.decorator';
-export * from './user.decorator'  ;
+export * from './account.decorator';
+export * from './check-policy.decorator';
