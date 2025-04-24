@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { SignInDto, SignUpDto } from './dtos';
+import { RefreshTokenDto, SignInDto, SignUpDto } from './dtos';
 import { AccountService } from '../account/account.service';
 import { AccountWithRolesAndPoliciesDto, CreateAccountDto, FilterAccountDto } from '../account/dto';
 import { AppException } from '../shared/utils';
@@ -48,7 +48,11 @@ export class AuthService {
     return this.generateAuthResponse(accountDetails);
   }
 
-  async refreshToken(account: AccountWithRolesAndPoliciesDto) {
+  async refreshToken(input: RefreshTokenDto) {
+    const account = await this.verify(input.refreshToken);
+    if (!account) {
+      throw new AppException(HttpStatus.UNAUTHORIZED, 'Invalid refresh token');
+    }
     return this.generateAuthResponse(account);
   }
 

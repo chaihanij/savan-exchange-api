@@ -31,10 +31,9 @@ async function bootstrap() {
       'token',
     )
     .addCookieAuth('accessToken')
-    .addCookieAuth('refreshToken')
     .addTag('API')
     .build();
-  
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, documentFactory);
 
